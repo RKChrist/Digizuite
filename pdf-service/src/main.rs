@@ -9,7 +9,7 @@ use lapin::{
 
 #[tokio::main]
 async fn main() {
-    let uri = "amqp://guest:guest@localhost:5672/%2F";
+    let uri = "amqp://guest:guest@rabbitmq:5672/%2F";
     let options = ConnectionProperties::default()
         .with_executor(tokio_executor_trait::Tokio::current())
         .with_reactor(tokio_reactor_trait::Tokio);
