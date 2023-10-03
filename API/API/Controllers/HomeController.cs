@@ -36,7 +36,7 @@ namespace API.Controllers
             string exchange = "e_files";
             string exchangeType = ExchangeType.Headers;
             string key = "x-filetype";
-            string queueName = "pdf";
+            string queueName = "q_pdf";
            
             MemoryStream ms = new(new byte[File.Length]);
             await File.CopyToAsync(ms);
@@ -51,7 +51,7 @@ namespace API.Controllers
                 using var image = SixLabors.ImageSharp.Image.Load(File.OpenReadStream());
                 headers.Add("Width", image.Width);
                 headers.Add("Height", image.Height);
-                queueName = "Images";
+                queueName = "q_images";
             }
 
             _connection.SendUsingHeaders(queueName, exchange, exchangeType, headers, ms.ToArray());
