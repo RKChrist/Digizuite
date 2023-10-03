@@ -397,3 +397,8 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 pdf-service/target/
+
+# Python stuff
+image_service/env/
+image_service/test_images/
+image_service/__pycache__/
