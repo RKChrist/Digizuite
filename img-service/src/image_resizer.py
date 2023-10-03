@@ -18,5 +18,6 @@ class ImageResizer:
                 im = Image.open(img_path)
                 im.thumbnail(size, Image.Resampling.LANCZOS)
                 im.save(outfile, "JPEG")
-            except IOError:
-                print("cannot create thumbnailfor '{infile}'")
+            except IOError as error:
+                print("cannot create thumbnailfor '{img_path}'")
+                print(error)

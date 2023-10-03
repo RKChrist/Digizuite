@@ -8,7 +8,7 @@ namespace API.RabbitMQ
     {
         // https://stackoverflow.com/questions/15033848/how-can-a-rabbitmq-client-tell-when-it-loses-connection-to-the-server
         private string host = "localhost";
-        private int port = 5672;
+        private int port = 6000;
         private ConnectionFactory _factory;
         private IConnection connection;
 
