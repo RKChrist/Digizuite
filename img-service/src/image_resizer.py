@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, io
 from PIL import Image
 
 
@@ -21,3 +21,15 @@ class ImageResizer:
             except IOError as error:
                 print("cannot create thumbnailfor '{img_path}'")
                 print(error)
+    
+    def resize_from_bytes(self, img_data, height, width):
+        size = height, width
+        im = Image.open(io.BytesIO(img_data))
+        height = im.height
+        width = im.width
+        print(f'image width: {width} - image height: {height}')
+        
+        im.thumbnail(size, Image.Resampling.LANCZOS)
+        im.save("image.jpg", "jpeg")
+        return im
+
