@@ -8,7 +8,7 @@ namespace API.RabbitMQ
     {
         // https://stackoverflow.com/questions/15033848/how-can-a-rabbitmq-client-tell-when-it-loses-connection-to-the-server
         private string host = "localhost";
-        private int port = 6000;
+        private int port = 5672;
         private ConnectionFactory _factory;
         private IConnection connection;
 
@@ -52,7 +52,7 @@ namespace API.RabbitMQ
             {
                 _logger.LogInformation("RabbitConnection.createChannel(string exchange, string exchangeType): is connected");
                 channel = connection.CreateModel();
-                channel.ExchangeDeclare(exchange: exchange, type: exchangeType);
+                channel.ExchangeDeclare(exchange: exchange, type: exchangeType, true, autoDelete: false);
                 return channel;
             }
             else
@@ -110,7 +110,7 @@ namespace API.RabbitMQ
             return result;
         }
 
-        public bool SendUsingHeaders(string queueName, string exchangeName, string exchangeType, Dictionary<string, object> Headers, byte[]? message)
+        public bool SendUsingHeaders(string queueName, string exchangeName, string exchangeType, Dictionary<string, object> headers, byte[]? message)
         {
             string channelKey = CreateChannelKey(exchangeName, exchangeType);
             IModel channel = GetChannel(exchangeName, exchangeType);
@@ -118,7 +118,7 @@ namespace API.RabbitMQ
             var properties = channel.CreateBasicProperties();
             properties.Persistent = true;
             channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
-            channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: "", Headers);
+            channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: "", headers);
 
             channel.BasicPublish(exchange: exchangeName,
                                  routingKey: "",

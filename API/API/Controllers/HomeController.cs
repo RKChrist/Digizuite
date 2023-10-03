@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQ.Client;
 using System.Data.Common;
+using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Xml.Linq;
@@ -24,10 +25,9 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index(HttpRequestMessage request)
+        public IActionResult Index()
         {
-            Response.StatusCode = StatusCodes.Status418ImATeapot;
-            return View("Im a teapot");
+            return StatusCode(418);
         }
 
         [HttpPost]
@@ -37,28 +37,25 @@ namespace API.Controllers
             string exchangeType = ExchangeType.Headers;
             string key = "x-filetype";
             string queueName = "pdf";
-            try
+           
+            MemoryStream ms = new(new byte[File.Length]);
+            await File.CopyToAsync(ms);
+            Dictionary<string, object> headers = new Dictionary<string, object>
             {
-                MemoryStream ms = new MemoryStream(new byte[File.Length]);
-                await File.CopyToAsync(ms);
+                { "x-match", "any" },
+                { key, File.ContentType }
+            };
 
-                await File.CopyToAsync(ms);
-                Dictionary<string, object> headers = new Dictionary<string, object>();
-                headers.Add("x-match", "any");
-                headers.Add(key, File.ContentType);
-                if (File.ContentType.Contains("image"))
-                {
-                    using var image = SixLabors.ImageSharp.Image.Load(File.OpenReadStream());
-                    headers.Add("Width", image.Width);
-                    headers.Add("Height", image.Height);
-                    queueName = "Images";
-                }
-                _connection.SendUsingHeaders("Images", exchange, exchangeType, headers, ms.ToArray());
-            }
-            catch(Exception ex)
+            if (File.ContentType.Contains("image"))
             {
-                
+                using var image = SixLabors.ImageSharp.Image.Load(File.OpenReadStream());
+                headers.Add("Width", image.Width);
+                headers.Add("Height", image.Height);
+                queueName = "Images";
             }
+
+            _connection.SendUsingHeaders(queueName, exchange, exchangeType, headers, ms.ToArray());
+            
 
 
             return Ok(File.FileName + ": Hello :" + File.ContentType + ": Hello : " + File.ContentDisposition);
