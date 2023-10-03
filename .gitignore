@@ -399,6 +399,5 @@ FodyWeavers.xsd
 pdf-service/target/
 
 # Python stuff
-image_service/env/
-image_service/test_images/
-image_service/__pycache__/
+env/
+test_images/
