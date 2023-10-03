@@ -27,7 +27,7 @@ namespace API.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return StatusCode(418);
+            return Ok("Hello World");
         }
 
         [HttpPost]
@@ -40,6 +40,7 @@ namespace API.Controllers
            
             MemoryStream ms = new(new byte[File.Length]);
             await File.CopyToAsync(ms);
+
             Dictionary<string, object> headers = new Dictionary<string, object>
             {
                 { "x-match", "any" },

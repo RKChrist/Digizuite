@@ -16,11 +16,13 @@ namespace API.RabbitMQ
         private static IModel channel = null;
         private Dictionary<string, IModel> channelDict = new Dictionary<string, IModel>();
         private readonly ILogger<RabbitConnection> _logger;
+        private Dictionary<string,object> _deadLetterQueue = new Dictionary<string, object>();
 
         public RabbitConnection(ILogger<RabbitConnection> logger)
         {
             _logger = logger;
-            _factory = new ConnectionFactory { HostName = host, Port = port, RequestedHeartbeat = TimeSpan.FromSeconds(16) };
+            _factory = new ConnectionFactory { HostName = host, Port = port, 
+                                               RequestedHeartbeat = TimeSpan.FromSeconds(16) };
 
         }
         private IConnection CreateConnection()
@@ -44,6 +46,13 @@ namespace API.RabbitMQ
             }
             return createdConnection;
         }
+
+        private void CreateDeadLetterQueue(string exchange)
+        {
+            channel.ExchangeDeclare("dead-letter", "direct");
+            _deadLetterQueue.Add("x-dead-letter-exchange", "dead-letter");
+            _ = channel.QueueDeclare("dead-letter-queue", false, false, false);
+        }
         public IModel CreateChannel(string exchange, string exchangeType)
         {
             //TODO: make this use the input parameter exchangeType
@@ -52,6 +61,7 @@ namespace API.RabbitMQ
             {
                 _logger.LogInformation("RabbitConnection.createChannel(string exchange, string exchangeType): is connected");
                 channel = connection.CreateModel();
+                CreateDeadLetterQueue(exchange);
                 channel.ExchangeDeclare(exchange: exchange, type: exchangeType, true, autoDelete: false);
                 return channel;
             }
@@ -117,13 +127,14 @@ namespace API.RabbitMQ
             //Properties
             var properties = channel.CreateBasicProperties();
             properties.Persistent = true;
-            channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: _deadLetterQueue);
             channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: "", headers);
 
             channel.BasicPublish(exchange: exchangeName,
                                  routingKey: "",
                                  basicProperties: properties,
                                  body: message);
+            
             return true;
 
         }
