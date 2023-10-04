@@ -7,7 +7,7 @@ namespace API.RabbitMQ
     public class RabbitConnection : IRabbitConnection
     {
         // https://stackoverflow.com/questions/15033848/how-can-a-rabbitmq-client-tell-when-it-loses-connection-to-the-server
-        private string host = "rabbitmq";
+        private string host = "localhost";
         private int port = 5672;
         private ConnectionFactory _factory;
         private IConnection connection;

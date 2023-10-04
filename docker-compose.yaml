@@ -9,7 +9,7 @@ services:
       - "${RabbitMQManagement_OutPORT}:${RabbitMQManagementPort}"
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-  
+
   csharp_api:
     container_name: csharp
     restart: on-failure
