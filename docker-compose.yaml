@@ -19,6 +19,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      - RABBITMQ_HOST=rabbitmq
     volumes:
       - csharp:/src
     ports:

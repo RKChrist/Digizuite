@@ -1,11 +1,14 @@
 ﻿using API.RabbitMQ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System.Data.Common;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Text;
+using System.Text.Json.Serialization;
 using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -43,24 +46,36 @@ namespace API.Controllers
 
             Dictionary<string, object> headers = new Dictionary<string, object>
             {
-                { "x-match", "any" },
-                { key, File.ContentType }
+                { "x-match", "all" }
             };
-
+            Json json = new Json();
+            json.Message = Encoding.ASCII.GetString(ms.ToArray());
+            
             if (File.ContentType.Contains("image"))
             {
                 using var image = SixLabors.ImageSharp.Image.Load(File.OpenReadStream());
-                headers.Add("Width", image.Width);
-                headers.Add("Height", image.Height);
+                json.Width = image.Width;
+                json.Height = image.Height;
                 queueName = "q_images";
+                headers.Add(key, "image");
+            }
+            else{
+                headers.Add(key, "pdf");
             }
 
-            _connection.SendUsingHeaders(queueName, exchange, exchangeType, headers, ms.ToArray());
+            var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(json));
+            _connection.SendUsingHeaders(queueName, exchange, exchangeType, headers, bytes);
             
-
 
             return Ok(File.FileName + ": Hello :" + File.ContentType + ": Hello : " + File.ContentDisposition);
 
         }
     }
-}
+    public class Json
+    {
+        public int Height { get; set; }
+         public int Width { get; set; }
+        public string Message { get; set; }
+
+    }
+}   
