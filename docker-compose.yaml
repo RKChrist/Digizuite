@@ -9,50 +9,47 @@ services:
       - "${RabbitMQManagement_OutPORT}:${RabbitMQManagementPort}"
     volumes:
       - rabbitmq:/var/lib/rabbitmq
+  
   csharp_api:
     container_name: csharp
     restart: on-failure
-    #image: ${CSharp_API_Image}
     build:
-      context: ./API/API
+      context: ./API
       dockerfile: Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-
     volumes:
       - csharp:/src
     ports:
-    - "8080:80"
-    - "8081:443"
+    #Http
+    - "${CSharp_API_OutPORT}:${CSharp_API_PORT}"
     depends_on:
       - rabbitmq
   
-  # ImageAPI:
-  #   container_name: Images_API
-  #   #image: ${Images_API_Image}
-  #   build:
-  #     context: ./ImagesAPI
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "${Images_API_OutPORT}:${Images_API_InPORT}"
-  #   volumes:
-  #     - ImageAPI:/app
+  imageservice:
+    container_name: imageservice
+    build:
+      context: ./img-service
+      dockerfile: Dockerfile
+    volumes:
+      - image:/app
 
-  # PdfAPI:
-  #   container_name: pdfapi
-  #   #image: ${Pdf_API_Image}
-  #   build:
-  #     context: ./pdf-service
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - pdfapi:/app
-  #   depends_on:
-  #     - API
+  pdfservice:
+    container_name: pdfservice
+    build:
+      context: ./pdf-service
+      dockerfile: Dockerfile
+    volumes:
+      - pdfapi:/app
+    depends_on:
+      - csharp_api
+
+  
 
 volumes:
   csharp:
- #ImageAPI:
+  image:
   pdfapi:
   rabbitmq:
 

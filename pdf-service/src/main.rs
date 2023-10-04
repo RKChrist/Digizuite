@@ -23,20 +23,20 @@ async fn main() {
 
     // let _exchange = channel.exchange_declare("e_files", ExchangeKind::Headers, options::ExchangeDeclareOptions::default(), arguments).await;
 
-    let _queue = channel
-        .queue_declare(
-            "q_pdf",
-            options::QueueDeclareOptions::default(),
-            FieldTable::default(),
-        )
-        .await
-        .unwrap();
+    // let _queue = channel
+    //     .queue_declare(
+    //         "q_pdf",
+    //         options::QueueDeclareOptions::default(),
+    //         FieldTable::default(),
+    //     )
+    //     .await
+    //     .unwrap();
 
     println!("--> Declared queue");
 
     let consumer = channel
         .basic_consume(
-            "c_pdf",
+            "q_pdf",
             "pdf-service-tag",
             BasicConsumeOptions::default(),
             FieldTable::default(),
