@@ -40,10 +40,10 @@ namespace API.Controllers
             string exchangeType = ExchangeType.Headers;
             string key = "x-filetype";
             string queueName = "q_pdf";
-           
+            string filetype = "pdf";
             MemoryStream ms = new(new byte[File.Length]);
             await File.CopyToAsync(ms);
-
+            
             Dictionary<string, object> headers = new Dictionary<string, object>
             {
                 { "x-match", "all" }
@@ -58,10 +58,16 @@ namespace API.Controllers
                 json.Height = image.Height;
                 queueName = "q_images";
                 headers.Add(key, "image");
+                filetype = "image";
+
             }
-            else{
+
+            else {
                 headers.Add(key, "pdf");
             }
+
+            headers.Add(
+                filetype, File.ContentType);
 
             var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(json));
             _connection.SendUsingHeaders(queueName, exchange, exchangeType, headers, bytes);
