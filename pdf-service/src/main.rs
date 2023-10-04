@@ -56,7 +56,6 @@ async fn main() {
         .with_reactor(tokio_reactor_trait::Tokio);
 
     let connection = connect_rabbitmq(&uri, options).await;
-
     let channel = connection.create_channel().await.unwrap();
 
     let consumer = consume_pdf_queue(&channel).await;
