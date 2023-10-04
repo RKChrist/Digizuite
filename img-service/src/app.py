@@ -8,11 +8,12 @@ import pprint
 
 RABBIT_MQ_HOST = os.environ.get('RabbitMQServerHost', 'rabbitmq')
 RABBIT_MQ_PORT = os.environ.get('RabbitMQServerPort', '5672')
-RETRY_DELAY = 3
+RETRY_DELAY = 5 # seconds between attempts
 
 class Main:
     
     def __init__(self, resizer) -> None:
+        self.resizer = resizer
         self.channel = None
         self.connection = None
         self.queue_name = 'q_images'
@@ -34,21 +35,13 @@ class Main:
                 print(f'connection to {RABBIT_MQ_HOST}:{RABBIT_MQ_PORT} FAILED')
                 await self.delay()
 
+
     async def create_channel(self):
         while True:
             try:
                 self.channel = self.connection.channel()
-                print(f'channel created')
-                return
-            except Exception as e:
-                print("failed to get channel")
-                print(e)
-                await self.delay()
-
-    async def bind_channel(self):
-        while True:
-            try:
                 self.channel.queue_bind(exchange=self.exchange_name, queue=self.queue_name)
+                print(f'channel created')
                 return
             except Exception as e:
                 print('rabbit mq channel not ready yet')
@@ -59,19 +52,23 @@ class Main:
     async def run(self):
         await self.create_connection()
         await self.create_channel()
-        await self.bind_channel()
-        
-        self.channel = self.create_channel()
+
         self.channel.basic_consume(
             queue=self.queue_name, on_message_callback=self.callback, auto_ack=True)
         self.channel.start_consuming()
         print(' [*] Waiting for logs. To exit press CTRL+C')
 
     def callback(self, ch, method, properties, body):
-        headers = properties.headers
-        print('headers:\n', headers)
-        resized_image = self.resizer.resize_from_bytes(body, 128, 128)
+        print(properties)
+        image_width = self.get_from_headers_or_default(properties, 'width', 128)
+        image_height = self.get_from_headers_or_default(
+            properties, 'height', 128)
+        file_ext = self.get_from_headers_or_default(properties, 'extension', 128)
+        resized_image = self.resizer.resize_from_bytes(body, image_height, image_width, file_ext)
         pprint.pprint(properties)
+
+    def get_from_headers_or_default(self, properties, key, default):
+        return properties.headers[key] if properties.headers and properties.headers[key] else default
 
 
 if __name__ == '__main__':

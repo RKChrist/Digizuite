@@ -37,6 +37,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - image:/app
+      - ./output_images:/usr/output_images
 
   pdfservice:
     container_name: pdfservice

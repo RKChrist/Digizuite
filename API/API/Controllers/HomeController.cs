@@ -52,7 +52,7 @@ namespace API.Controllers
             
             Dictionary<string, object> headers = new Dictionary<string, object>
             {
-                { "x-match", "all" }
+                { "x-match", "any" }
             };
             
             
@@ -61,7 +61,7 @@ namespace API.Controllers
                 using var image = SixLabors.ImageSharp.Image.Load(File.OpenReadStream());
                 queueName = "q_images";
                 headers.Add(key, "image");
-                headers.Add("extension", File.FileName.Split(".")[-1]);
+                headers.Add("extension", File.FileName.Split(".")[1]);
                 headers.Add("width", wishedWidth ??  image.Width);
                 headers.Add("height", wishedHeight ?? image.Height);
                 filetype = "image";
