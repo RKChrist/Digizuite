@@ -33,6 +33,12 @@ namespace API.Controllers
             return Ok("Hello World");
         }
 
+        [HttpGet]
+        public IActionResult Teapot()
+        {
+            return StatusCode(418);
+        }
+
         [HttpPost]
         public async Task<IActionResult> SendToRabbit(IFormFile File, int? wishedWidth, int? wishedHeight)
         {

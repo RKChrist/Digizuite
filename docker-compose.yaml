@@ -1,4 +1,5 @@
 version: '${DockerVersion}'
+
 services:
   rabbitmq:
     container_name: rabbitmq
