@@ -9,7 +9,7 @@ use lapin::{
 
 #[tokio::main]
 async fn main() {
-    let uri = "amqp://guest:guest@localhost:5672/%2F";
+    let uri = "amqp://guest:guest@localhost:5673/%2F";
     let options = ConnectionProperties::default()
         .with_executor(tokio_executor_trait::Tokio::current())
         .with_reactor(tokio_reactor_trait::Tokio);
@@ -36,7 +36,7 @@ async fn main() {
 
     let consumer = channel
         .basic_consume(
-            "c_pdf",
+            "q_pdf",
             "pdf-service-tag",
             BasicConsumeOptions::default(),
             FieldTable::default(),
