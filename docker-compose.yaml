@@ -29,6 +29,7 @@ services:
   
   imageservice:
     container_name: imageservice
+    image: ${Images_API_Image}
     build:
       context: ./img-service
       dockerfile: Dockerfile
@@ -44,8 +45,6 @@ services:
       - pdfapi:/app
     depends_on:
       - csharp_api
-
-  
 
 volumes:
   csharp:
