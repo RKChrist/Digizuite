@@ -29,7 +29,7 @@ services:
   
   imageservice:
     container_name: imageservice
-    image: ${Images_API_Image}
+    # image: ${Images_API_Image}
     build:
       context: ./img-service
       dockerfile: Dockerfile

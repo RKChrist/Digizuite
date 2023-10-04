@@ -5,10 +5,13 @@ from image_resizer import ImageResizer
 
 import pprint
 
-RABBIT_MQ_HOST = os.environ.get('RabbitMQServerHost', 'localhost')
+RABBIT_MQ_HOST = os.environ.get('RabbitMQServerHost', 'rabbitmq')
 RABBIT_MQ_PORT = os.environ.get('RabbitMQServerPort', '5672')
 
 resizer = ImageResizer()
+
+print('trying to connect to {RABBIT_MQ_HOST}:{RABBIT_MQ_PORT}')
+
 connection = pika.BlockingConnection(
     pika.ConnectionParameters(host=RABBIT_MQ_HOST, port=RABBIT_MQ_PORT))
 channel = connection.channel()
