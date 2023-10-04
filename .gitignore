@@ -401,3 +401,4 @@ pdf-service/target/
 # Python stuff
 env/
 test_images/
+.vscode/
