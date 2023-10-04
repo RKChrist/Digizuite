@@ -1,48 +1,65 @@
+use std::env;
 use std::time::Duration;
 
 use lapin::{
     message::DeliveryResult,
-    options::{self, BasicConsumeOptions, BasicAckOptions},
+    options::{BasicAckOptions, BasicConsumeOptions},
     types::FieldTable,
-    Connection, ConnectionProperties,
+    Connection, ConnectionProperties, Channel, Consumer,
 };
+
+const QUEUE_NAME: &str = "q_pdf";
+const CONSUMER_TAG: &str = "pdf-service-tag";
+
+async fn connect_rabbitmq(uri: &str, connection_properties: ConnectionProperties) -> Connection {
+    let mut connection = Connection::connect(uri, connection_properties.clone()).await;
+
+    while connection.is_err() {
+        println!(
+            "--> Failed to connect to rabbitmq: {}",
+            &connection.unwrap_err()
+        );
+        println!("--> Attempting to reconnect in 3 seconds...");
+        std::thread::sleep(Duration::from_millis(3000));
+        connection = Connection::connect(uri, connection_properties.clone()).await;
+    }
+    println!("--> Connected to rabbitmq!");
+    // There might be a way to register a callback to handle dropped connections here
+    let connection = connection.unwrap();
+    connection
+}
+
+async fn consume_pdf_queue(channel: &Channel) -> Consumer {
+    let mut consumer = channel.basic_consume(QUEUE_NAME, CONSUMER_TAG, BasicConsumeOptions::default(), FieldTable::default()).await;
+
+    while consumer.is_err() {
+        println!("--> Failed to consume queue: {}", &consumer.unwrap_err());
+        println!("--> Attempting to re-consume queue in 3 seconds...");
+        std::thread::sleep(Duration::from_millis(3000));
+        consumer = channel.basic_consume(QUEUE_NAME, CONSUMER_TAG, BasicConsumeOptions::default(), FieldTable::default()).await;
+    }
+    
+    let consumer = consumer.unwrap();
+    consumer
+}
 
 #[tokio::main]
 async fn main() {
-    let uri = "amqp://guest:guest@localhost:5673/%2F";
+    // Default URI will connect to default virtual host `/`
+    // source https://docs.rs/lapin/latest/lapin/struct.Connection.html
+    let uri: String = env::var("RABBITMQ_URI")
+        .unwrap_or_else(|_| "amqp://guest:guest@localhost:5673/%2F".to_string());
+
     let options = ConnectionProperties::default()
+        .with_connection_name("pdf-service-connection".to_string().into())
         .with_executor(tokio_executor_trait::Tokio::current())
         .with_reactor(tokio_reactor_trait::Tokio);
 
-    let connection = Connection::connect(uri, options).await.unwrap();
+    let connection = connect_rabbitmq(&uri, options).await;
+
     let channel = connection.create_channel().await.unwrap();
 
-    // let mut arguments = FieldTable::default();
-
-    // arguments.insert("x-filetype".into(), AMQPValue::LongString("pdf".into()));
-
-    // let _exchange = channel.exchange_declare("e_files", ExchangeKind::Headers, options::ExchangeDeclareOptions::default(), arguments).await;
-
-    let _queue = channel
-        .queue_declare(
-            "q_pdf",
-            options::QueueDeclareOptions::default(),
-            FieldTable::default(),
-        )
-        .await
-        .unwrap();
-
-    println!("--> Declared queue");
-
-    let consumer = channel
-        .basic_consume(
-            "q_pdf",
-            "pdf-service-tag",
-            BasicConsumeOptions::default(),
-            FieldTable::default(),
-        )
-        .await
-        .unwrap();
+    let consumer = consume_pdf_queue(&channel).await;
 
     println!("--> Waiting for messages...");
 
@@ -56,7 +73,7 @@ async fn main() {
             Err(error) => {
                 dbg!("Failed to consume queue message {}", error);
                 return;
-            },
+            }
         };
 
         // Simulate processing...
