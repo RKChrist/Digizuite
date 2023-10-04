@@ -9,6 +9,7 @@ services:
       - "${RabbitMQManagement_OutPORT}:${RabbitMQManagementPort}"
     volumes:
       - rabbitmq:/var/lib/rabbitmq
+
   csharp_api:
     container_name: csharp
     restart: on-failure
@@ -28,16 +29,19 @@ services:
     depends_on:
       - rabbitmq
   
-  # ImageAPI:
-  #   container_name: Images_API
-  #   #image: ${Images_API_Image}
-  #   build:
-  #     context: ./ImagesAPI
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "${Images_API_OutPORT}:${Images_API_InPORT}"
-  #   volumes:
-  #     - ImageAPI:/app
+  image-service:
+    container_name: Images_API
+    image: ${Images_API_Image}
+    # env:
+    #   RABBIT_MQ_PORT: ${RabbitMQServer_OutPORT}
+    #   RABBIT_MQ_HOST: rabbitmq
+    build:
+      context: ./img-service
+      dockerfile: Dockerfile
+    # ports:
+    #   - "${Images_API_OutPORT}:${Images_API_InPORT}"
+    volumes:
+      - image_service:/app
 
   # PdfAPI:
   #   container_name: pdfapi
@@ -52,7 +56,7 @@ services:
 
 volumes:
   csharp:
- #ImageAPI:
+  image_service:
   pdfapi:
   rabbitmq:
 

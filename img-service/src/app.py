@@ -3,8 +3,10 @@ import pika
 import io, os
 from image_resizer import ImageResizer
 
-RABBIT_MQ_HOST = os.environ['RABBIT_MQ_HOST']
-RABBIT_MQ_PORT = os.environ['RABBIT_MQ_PORT']
+import pprint
+
+RABBIT_MQ_HOST = os.environ.get('RabbitMQServerHost', 'localhost')
+RABBIT_MQ_PORT = os.environ.get('RabbitMQServerPort', '5672')
 
 resizer = ImageResizer()
 connection = pika.BlockingConnection(
@@ -22,13 +24,16 @@ channel.queue_bind(exchange='e_files', queue='q_images')
 print(' [*] Waiting for logs. To exit press CTRL+C')
 
 def callback(ch, method, properties, body):
-
+    headers = properties.headers
+    print('headers:\n', headers)
     resized_image = resizer.resize_from_bytes(body, 128, 128)
-    
-    print(type(body))
-    print(f" [x] {properties}")
-
+    pprint.pprint(properties)
 channel.basic_consume(
     queue=queue_name, on_message_callback=callback, auto_ack=True)
 
 channel.start_consuming()
+
+## 332a885e79c5   rabbitmq:3.12.3-management-alpine "docker-entrypoint.s…"
+# 0.0.0.0:6000->5672/tcp
+# 0.0.0.0:8080->15672/tcp
+# some-rabbit
