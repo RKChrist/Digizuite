@@ -11,7 +11,7 @@ namespace API.RabbitMQ
         private int port = 5672;
         private ConnectionFactory _factory;
         private IConnection connection;
-
+       
         private bool isConnected = false;
         private static IModel channel = null;
         private Dictionary<string, IModel> channelDict = new Dictionary<string, IModel>();
@@ -119,7 +119,7 @@ namespace API.RabbitMQ
 
             return result;
         }
-
+        //TODO FIX
         public bool SendUsingHeaders(string queueName, string exchangeName, string exchangeType, Dictionary<string, object> headers, byte[]? message)
         {
             IModel channel = GetChannel(exchangeName, exchangeType);
@@ -127,9 +127,11 @@ namespace API.RabbitMQ
             var properties = channel.CreateBasicProperties();
             properties.Persistent = true;
             properties.Headers = headers;
-
+            
+            
             channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: _deadLetterQueue);
             channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: "", headers);
+           
 
 
             channel.BasicPublish(exchange: exchangeName,

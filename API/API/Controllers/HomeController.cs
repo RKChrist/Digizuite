@@ -33,7 +33,7 @@ namespace API.Controllers
             return Ok("Hello World");
         }
 
-        [HttpGet]
+        [HttpGet("/Teapot")]
         public IActionResult Teapot()
         {
             return StatusCode(418);
@@ -54,40 +54,29 @@ namespace API.Controllers
             {
                 { "x-match", "all" }
             };
-            Json json = new Json();
-            json.Message = Encoding.ASCII.GetString(ms.ToArray());
+            
             
             if (File.ContentType.Contains("image"))
             {
                 using var image = SixLabors.ImageSharp.Image.Load(File.OpenReadStream());
-                json.Width = image.Width;
-                json.Height = image.Height;
                 queueName = "q_images";
                 headers.Add(key, "image");
+                headers.Add("extension", File.FileName.Split(".")[-1]);
+                headers.Add("width", wishedWidth ??  image.Width);
+                headers.Add("height", wishedHeight ?? image.Height);
                 filetype = "image";
-
             }
 
             else {
                 headers.Add(key, "pdf");
             }
 
-            headers.Add(
-                filetype, File.ContentType);
-
-            var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(json));
-            _connection.SendUsingHeaders(queueName, exchange, exchangeType, headers, bytes);
+            headers.Add(filetype, File.ContentType);
+            _connection.SendUsingHeaders(queueName, exchange, exchangeType, headers, ms.ToArray());
             
 
             return Ok(File.FileName + ": Hello :" + File.ContentType + ": Hello : " + File.ContentDisposition);
 
         }
-    }
-    public class Json
-    {
-        public int Height { get; set; }
-         public int Width { get; set; }
-        public string Message { get; set; }
-
     }
 }   
