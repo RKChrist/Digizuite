@@ -8,7 +8,7 @@ import pprint
 
 RABBIT_MQ_HOST = os.environ.get('RabbitMQServerHost', 'rabbitmq')
 RABBIT_MQ_PORT = os.environ.get('RabbitMQServerPort', '5672')
-RETRY_DELAY = 1
+RETRY_DELAY = 3
 
 class Main:
     
