@@ -7,7 +7,7 @@ namespace API.RabbitMQ
     public class RabbitConnection : IRabbitConnection
     {
         // https://stackoverflow.com/questions/15033848/how-can-a-rabbitmq-client-tell-when-it-loses-connection-to-the-server
-        private string host = "localhost";
+        private string host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
         private int port = 5672;
         private ConnectionFactory _factory;
         private IConnection connection;
@@ -122,13 +122,15 @@ namespace API.RabbitMQ
 
         public bool SendUsingHeaders(string queueName, string exchangeName, string exchangeType, Dictionary<string, object> headers, byte[]? message)
         {
-            string channelKey = CreateChannelKey(exchangeName, exchangeType);
             IModel channel = GetChannel(exchangeName, exchangeType);
             //Properties
             var properties = channel.CreateBasicProperties();
             properties.Persistent = true;
+            properties.Headers = headers;
+
             channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: _deadLetterQueue);
             channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: "", headers);
+
 
             channel.BasicPublish(exchange: exchangeName,
                                  routingKey: "",
