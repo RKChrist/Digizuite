@@ -44,6 +44,8 @@ services:
     build:
       context: ./pdf-service
       dockerfile: Dockerfile
+    environment:
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/%2F
     volumes:
       - pdfapi:/app
     depends_on:
