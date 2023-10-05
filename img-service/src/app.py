@@ -40,8 +40,6 @@ class Main:
         while True:
             try:
                 self.channel = self.connection.channel()
-                self.channel.queue_bind(exchange=self.exchange_name, queue=self.queue_name)
-                print(f'channel created')
                 return
             except Exception as e:
                 print('rabbit mq channel not ready yet')
