@@ -52,7 +52,7 @@ namespace API.Controllers
             
             Dictionary<string, object> headers = new Dictionary<string, object>
             {
-                { "x-match", "any" }
+                { "x-match", "all" }
             };
             
             

@@ -59,13 +59,16 @@ class Main:
         print(' [*] Waiting for logs. To exit press CTRL+C')
 
     def callback(self, ch, method, properties, body):
-        print(properties)
-        image_width = self.get_from_headers_or_default(properties, 'width', 128)
-        image_height = self.get_from_headers_or_default(
-            properties, 'height', 128)
-        file_ext = self.get_from_headers_or_default(properties, 'extension', 128)
-        resized_image = self.resizer.resize_from_bytes(body, image_height, image_width, file_ext)
-        pprint.pprint(properties)
+        try:
+            print(properties)
+            image_width = self.get_from_headers_or_default(properties, 'width', 128)
+            image_height = self.get_from_headers_or_default(
+                properties, 'height', 128)
+            file_ext = self.get_from_headers_or_default(properties, 'extension', 128)
+            resized_image = self.resizer.resize_from_bytes(body, image_height, image_width, file_ext)
+            pprint.pprint(properties)
+        except:
+            print("Message processing failed")
 
     def get_from_headers_or_default(self, properties, key, default):
         return properties.headers[key] if properties.headers and properties.headers[key] else default

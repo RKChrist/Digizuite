@@ -48,7 +48,7 @@ async fn main() {
     // Default URI will connect to default virtual host `/`
     // source https://docs.rs/lapin/latest/lapin/struct.Connection.html
     let uri: String = env::var("RABBITMQ_URI")
-        .unwrap_or_else(|_| "amqp://guest:guest@localhost:5673/%2F".to_string());
+        .unwrap_or_else(|_| "amqp://guest:guest@rabbitmq:5672/%2F".to_string());
 
     let options = ConnectionProperties::default()
         .with_connection_name("pdf-service-connection".to_string().into())
