@@ -9,7 +9,7 @@ services:
       - "${RabbitMQServer_OutPORT}:${RabbitMQServerPort}"
       - "${RabbitMQManagement_OutPORT}:${RabbitMQManagementPort}"
     volumes:
-      - rabbitmq:/var/lib/rabbitmq
+      - "${PWD}/rabbitmq.conf:/etc/rabbitmq/conf.d"
 
   csharp_api:
     container_name: csharp

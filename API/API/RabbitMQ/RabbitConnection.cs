@@ -61,8 +61,8 @@ namespace API.RabbitMQ
             {
                 _logger.LogInformation("RabbitConnection.createChannel(string exchange, string exchangeType): is connected");
                 channel = connection.CreateModel();
-                CreateDeadLetterQueue(exchange);
-                channel.ExchangeDeclare(exchange: exchange, type: exchangeType, true, autoDelete: false);
+                //CreateDeadLetterQueue(exchange);
+                //channel.ExchangeDeclare(exchange: exchange, type: exchangeType, true, autoDelete: false);
                 return channel;
             }
             else
@@ -129,8 +129,8 @@ namespace API.RabbitMQ
             properties.Headers = headers;
             
             
-            channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: _deadLetterQueue);
-            channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: "", headers);
+            //channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: _deadLetterQueue);
+            //channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: "", headers);
            
 
 
